@@ -1,0 +1,56 @@
+---
+kind: ObjectType
+version: v1
+definition:
+  name: InsertUserUserData
+  fields:
+    - name: password
+      type: String!
+    - name: username
+      type: String!
+  graphql:
+    typeName: User_InsertUserUserData
+    inputTypeName: User_InsertUserUserDataInput
+  dataConnectorTypeMapping:
+    - dataConnectorName: base_ts
+      dataConnectorObjectType: insertUser_userData
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: InsertUserUserData
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - password
+          - username
+
+---
+kind: Command
+version: v1
+definition:
+  name: InsertUser
+  outputType: String!
+  arguments:
+    - name: userData
+      type: InsertUserUserData!
+      description: An object containing the user's data.
+  source:
+    dataConnectorName: base_ts
+    dataConnectorCommand:
+      procedure: insertUser
+  graphql:
+    rootFieldName: user_insertUser
+    rootFieldKind: Mutation
+
+---
+kind: CommandPermissions
+version: v1
+definition:
+  commandName: InsertUser
+  permissions:
+    - role: admin
+      allowExecution: true
+

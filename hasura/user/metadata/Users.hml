@@ -1,0 +1,109 @@
+---
+kind: ObjectType
+version: v1
+definition:
+  name: Users
+  fields:
+    - name: id
+      type: Int4!
+    - name: password
+      type: Varchar!
+    - name: username
+      type: Varchar!
+  graphql:
+    typeName: User_Users
+    inputTypeName: User_UsersInput
+  dataConnectorTypeMapping:
+    - dataConnectorName: base_pg
+      dataConnectorObjectType: users
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: Users
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - id
+          - password
+          - username
+    - role: user
+      output:
+        allowedFields:
+          - id
+          - password
+          - username
+
+---
+kind: ObjectBooleanExpressionType
+version: v1
+definition:
+  name: UsersBoolExp
+  objectType: Users
+  dataConnectorName: base_pg
+  dataConnectorObjectType: users
+  comparableFields:
+    - fieldName: id
+      operators:
+        enableAll: true
+    - fieldName: password
+      operators:
+        enableAll: true
+    - fieldName: username
+      operators:
+        enableAll: true
+  graphql:
+    typeName: User_UsersBoolExp
+
+---
+kind: Model
+version: v1
+definition:
+  name: Users
+  objectType: Users
+  source:
+    dataConnectorName: base_pg
+    collection: users
+  filterExpressionType: UsersBoolExp
+  orderableFields:
+    - fieldName: id
+      orderByDirections:
+        enableAll: true
+    - fieldName: password
+      orderByDirections:
+        enableAll: true
+    - fieldName: username
+      orderByDirections:
+        enableAll: true
+  graphql:
+    selectMany:
+      queryRootField: user_users
+    selectUniques:
+      - queryRootField: user_usersById
+        uniqueIdentifier:
+          - id
+      - queryRootField: user_usersByUsername
+        uniqueIdentifier:
+          - username
+    orderByExpressionType: User_UsersOrderBy
+
+---
+kind: ModelPermissions
+version: v1
+definition:
+  modelName: Users
+  permissions:
+    - role: admin
+      select:
+        filter: null
+    - role: user
+      select: 
+        filter: 
+          fieldComparison:
+            field: id
+            operator: _eq
+            value: 
+              sessionVariable: x-hasura-user-id
+
