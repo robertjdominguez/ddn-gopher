@@ -27,10 +27,13 @@ func CreateClient() *graphql.Client {
 }
 
 // QueryHasura executes a GraphQL query and returns the response data
-func QueryHasura(client *graphql.Client, query string, variables map[string]interface{}) (map[string]interface{}, error) {
+func QueryHasura(client *graphql.Client, query string, variables map[string]interface{}, token string) (map[string]interface{}, error) {
 	req := graphql.NewRequest(query)
 
-	// First, we'll set any variables required for the query
+	// First, let's get our token set
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	// Then, we'll set any variables required for the query
 	for key, value := range variables {
 		req.Var(key, value)
 	}

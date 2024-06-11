@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -34,12 +35,13 @@ func LoginHandler(c *gin.Context) {
 
 	// Here's our GraphQL query to check if a user exists
 	query := `
-		query($username: string!) {
-	     user_users {
-	       id
-	       username
-	     }
-		}
+    query MyQuery($username: User_Varchar) {
+      user_users(where: {username: {_eq: $username}}) {
+        id
+        username
+        password
+      }
+    }
 	`
 
 	// Define variables for the query
@@ -47,18 +49,28 @@ func LoginHandler(c *gin.Context) {
 		"username": credentials.Username,
 	}
 
-	// Execute the query
-	respData, err := graphqlClient.QueryHasura(client, query, variables)
+	token, err := GenerateJWT("", "admin")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Print the response
-	user := respData["user"].(map[string]interface{})
-	fmt.Printf("User: %s\n", user["username"])
+	// Execute the query
+	respData, err := graphqlClient.QueryHasura(client, query, variables, token)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// If everything is good, let's give them a token
-	tokenString, err := GenerateJWT(credentials.Username)
+	// Let's find out about the user
+	user, err := json.Marshal(respData)
+	if err != nil {
+		fmt.Println("Error parsing JSON:", err)
+		return
+	}
+
+	fmt.Println(string(user))
+
+	// If everything is good, let's give them a token with a user role
+	tokenString, err := GenerateJWT(credentials.Username, "user")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return

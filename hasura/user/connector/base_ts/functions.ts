@@ -2,7 +2,7 @@ import { Client } from "pg";
 import dotenv from "dotenv";
 
 // Load environment variables from .env.local
-dotenv.config({ path: ".env.local" });
+dotenv.config();
 
 /**
  * @readonly Exposes the function as an NDC function (the function should only query data without making modifications)
@@ -15,7 +15,10 @@ export function hello(name?: string) {
  * @param userData An object containing the user's data.
  * @returns The ID of the newly inserted user.
  */
-export async function insertUser(userData: { username: string; password: string }): Promise<string> {
+export async function insertUser(userData: {
+  username: string;
+  password: string;
+}): Promise<string> {
   const client = new Client({
     connectionString: process.env.CONNECTION_URI,
   });
