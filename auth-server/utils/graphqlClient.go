@@ -1,4 +1,4 @@
-package graphqlClient
+package utils
 
 import (
 	"context"

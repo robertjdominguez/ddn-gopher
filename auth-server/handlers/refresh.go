@@ -4,12 +4,17 @@ import (
 	"net/http"
 	"os"
 
+	"dominguezdev.com/auth-server/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 
 	"github.com/joho/godotenv"
 )
 
+// TODO: Refactor this to match the login LoginHandler — we'll need utils for:
+// 1. validating the token
+// 2. validating the claims
+// 3. Using the username in the claims instead of the raw string
 func RefreshHandler(c *gin.Context) {
 	var request struct {
 		Token string `json:"token"`
@@ -49,8 +54,7 @@ func RefreshHandler(c *gin.Context) {
 	}
 
 	username := claims["user"].(string)
-	// TODO: When GenerateJWT is modified to take a user struct, modify this
-	newTokenString, err := GenerateJWT(username)
+	newTokenString, err := utils.GenerateJWT(username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
