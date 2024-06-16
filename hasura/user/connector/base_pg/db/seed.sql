@@ -5,3 +5,4 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 INSERT INTO users (username, password) VALUES ('exampleuser', 'examplepassword');
+INSERT INTO users (username, password) VALUES ('exampleuser1', 'examplepassword1');

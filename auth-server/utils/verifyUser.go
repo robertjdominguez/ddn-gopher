@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// BUG: If the length of users is 0, we need to better return that the user isn't found
 func VerifyUser(reqPassword string, userInformation map[string]interface{}) bool {
 	if userUsers, ok := userInformation["user_users"].([]interface{}); ok {
 		for _, user := range userUsers {
