@@ -4,33 +4,34 @@ import (
 	"fmt"
 )
 
-// BUG: If the length of users is 0, we need to better return that the user isn't found
-func VerifyUser(reqPassword string, userInformation map[string]interface{}) bool {
+// VerifyUser checks if the provided password matches any user in the userInformation map.
+// Returns a boolean indicating success and a message with the result.
+func VerifyUser(reqPassword string, userInformation map[string]interface{}) (bool, string) {
 	if userUsers, ok := userInformation["user_users"].([]interface{}); ok {
+		if len(userUsers) == 0 {
+			return false, "No users found"
+		}
 		for _, user := range userUsers {
-			// Here, we'll create the userMap and assert the type is, essentially, JSON
 			if userMap, ok := user.(map[string]interface{}); ok {
-				// We're doing the same thing here with the id and asserting it's a float
 				if id, ok := userMap["id"].(float64); ok {
 					fmt.Println("User ID:", int(id))
 				}
-				// Then again with the password to do a check
 				if password, ok := userMap["password"].(string); ok {
 					if password == reqPassword {
 						println("Password is correct. Here's a token!")
-						return true
+						return true, "Password is correct"
 					} else {
-						return false
+						return false, "Password incorrect"
 					}
+				} else {
+					return false, "Password not found for user"
 				}
 			} else {
-				fmt.Println("User data is not in expected format")
-				return false
+				return false, "User data is not in expected format"
 			}
 		}
 	} else {
-		fmt.Println("User users data not found or is in incorrect format")
-		return false
+		return false, "User users data not found or is in incorrect format"
 	}
-	return false
+	return false, "User not found"
 }

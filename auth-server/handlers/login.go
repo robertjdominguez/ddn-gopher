@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"dominguezdev.com/auth-server/models"
@@ -19,7 +20,7 @@ func LoginHandler(c *gin.Context) {
 	respData := utils.CheckForUser(credentials.Username)
 
 	// Then, if we've found them, we'll verify their credentials
-	isVerified := utils.VerifyUser(credentials.Password, respData)
+	isVerified, message := utils.VerifyUser(credentials.Password, respData)
 
 	// If everything is good, let's give them a token with a user role
 	tokenString, err := utils.GenerateJWT(credentials.Username, "user")
@@ -29,8 +30,8 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	if !isVerified {
-		println("Password is incorrect. Fuck off!")
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Password incorrect"})
+		fmt.Printf("Error: %s", message)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": message})
 	} else {
 		c.JSON(http.StatusOK, gin.H{"token": tokenString})
 	}
