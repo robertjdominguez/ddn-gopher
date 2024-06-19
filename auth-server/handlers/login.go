@@ -17,10 +17,19 @@ func LoginHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
+
+	// Otherwise, we'll take the username and see if it exists
 	respData := utils.CheckForUser(credentials.Username)
 
 	// Then, if we've found them, we'll verify their credentials
 	isVerified, message := utils.VerifyUser(credentials.Password, respData)
+
+	// If everything is good, let's give them a token with a user role
+	if !isVerified {
+		fmt.Printf("Error: %s", message)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": message})
+		return
+	}
 
 	// If everything is good, let's give them a token with a user role
 	tokenString, err := utils.GenerateJWT(credentials.Username, "user")
@@ -29,10 +38,6 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	if !isVerified {
-		fmt.Printf("Error: %s", message)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": message})
-	} else {
-		c.JSON(http.StatusOK, gin.H{"token": tokenString})
-	}
+	// Then, serve it up to them
+	c.JSON(http.StatusOK, gin.H{"token": tokenString})
 }
