@@ -12,7 +12,7 @@ func CheckForUser(username string) map[string]interface{} {
 		"username": username,
 	}
 
-	token, err := GenerateJWT("", "admin")
+	token, err := GenerateJWT("", 0, "admin")
 	if err != nil {
 		log.Fatal(err)
 	}

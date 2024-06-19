@@ -5,7 +5,7 @@ import (
 )
 
 // This will generate a JWT with the username, id, and role.
-func GenerateJWT(username string, roles ...string) (string, error) {
+func GenerateJWT(username string, id float64, roles ...string) (string, error) {
 	// Let's make sure we have the secret
 	jwtSecret := GetJWTSecret()
 
@@ -16,7 +16,7 @@ func GenerateJWT(username string, roles ...string) (string, error) {
 	}
 
 	// TODO: Dynamically pass in the userId value
-	claims := GenerateClaims(username, 1, role)
+	claims := GenerateClaims(username, id, role)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 

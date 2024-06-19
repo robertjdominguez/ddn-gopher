@@ -16,7 +16,7 @@ var AdminClaims = map[string]interface{}{
 }
 
 // Function to shape user claims
-func ShapeUserClaims(userId int, userRole string) map[string]interface{} {
+func ShapeUserClaims(userId float64, userRole string) map[string]interface{} {
 	return map[string]interface{}{
 		"x-hasura-user-id":       userId,
 		"x-hasura-role":          userRole,
@@ -26,7 +26,7 @@ func ShapeUserClaims(userId int, userRole string) map[string]interface{} {
 }
 
 // Function to generate the claims
-func GenerateClaims(username string, userId int, userRole string) jwt.MapClaims {
+func GenerateClaims(username string, userId float64, userRole string) jwt.MapClaims {
 	claims := jwt.MapClaims{
 		"user":                         username,
 		"exp":                          time.Now().Add(time.Hour * 72).Unix(),

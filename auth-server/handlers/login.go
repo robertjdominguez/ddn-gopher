@@ -22,17 +22,17 @@ func LoginHandler(c *gin.Context) {
 	respData := utils.CheckForUser(credentials.Username)
 
 	// Then, if we've found them, we'll verify their credentials
-	isVerified, err := utils.VerifyUser(credentials.Password, respData)
+	username, id, err := utils.VerifyUser(credentials.Password, respData)
 
 	// If everything is good, let's give them a token with a user role
-	if !isVerified {
+	if len(username) == 0 {
 		fmt.Printf("Error: %s", err.Error())
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
 	// If everything is good, let's give them a token with a user role
-	tokenString, err := utils.GenerateJWT(credentials.Username, "user")
+	tokenString, err := utils.GenerateJWT(username, id, "user")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return

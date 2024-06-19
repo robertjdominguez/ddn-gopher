@@ -23,7 +23,7 @@ func RefreshHandler(c *gin.Context) {
 		return
 	}
 
-	newTokenString, err := utils.GenerateJWT(decodedToken.Username, "user")
+	newTokenString, err := utils.GenerateJWT(decodedToken.Username, decodedToken.UserId, "user")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
