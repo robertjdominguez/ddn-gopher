@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -14,13 +15,13 @@ func CreateClient() *graphql.Client {
 	if os.Getenv("GRAPHQL_ENDPOINT") == "" {
 		err := godotenv.Load()
 		if err != nil {
-			panic("Error loading .env file and GRAPHQL_ENDPOINT environment variable not set")
+			log.Fatalf("CreateClient: Error loading .env file and GRAPHQL_ENDPOINT environment variable not set %v", err)
 		}
 	}
 
 	endpoint := []byte(os.Getenv("GRAPHQL_ENDPOINT"))
 	if len(endpoint) == 0 {
-		panic("GRAPHQL_ENDPOINT environment variable not set")
+		log.Fatalf("CreateClient: GRAPHQL_ENDPOINT environment variable not set")
 	}
 
 	return graphql.NewClient(string(endpoint))
@@ -46,9 +47,7 @@ func QueryHasura(client *graphql.Client, query string, variables map[string]inte
 
 	// Finally, execute the request
 	if err := client.Run(ctx, req, &respData); err != nil {
-		log.Println("Error executing query:", err)
-
-		return nil, err
+		return nil, fmt.Errorf("QueryHasura: Error executing query: %w", err)
 	}
 
 	return respData, nil

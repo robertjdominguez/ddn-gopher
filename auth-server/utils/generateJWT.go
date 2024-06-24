@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"fmt"
+
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -15,14 +17,13 @@ func GenerateJWT(username string, id float64, roles ...string) (string, error) {
 		role = roles[0]
 	}
 
-	// TODO: Dynamically pass in the userId value
 	claims := GenerateClaims(username, id, role)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	tokenString, err := token.SignedString(jwtSecret)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("GenerateJWT: failed to generate a JWT: %w", err)
 	}
 
 	return tokenString, nil
