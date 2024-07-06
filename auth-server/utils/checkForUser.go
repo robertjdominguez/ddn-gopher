@@ -5,12 +5,15 @@ import (
 	"log"
 )
 
+// TODO: Move this to an errors package...Rikin was right
+var ErrEmptyUsername = errors.New("username cannot be an empty string")
+
 func CheckForUser(username string) (map[string]interface{}, error) {
 	client := CreateClient()
 
 	// Check to see if there is a non-empty string for the username
 	if username == "" {
-		return nil, errors.New("username cannot be an empty string")
+		return nil, ErrEmptyUsername
 	}
 
 	// Define variables for the query
