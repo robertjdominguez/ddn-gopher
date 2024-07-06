@@ -19,7 +19,7 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	// Otherwise, we'll take the username and see if it exists
-	respData := utils.CheckForUser(credentials.Username)
+	respData, _ := utils.CheckForUser(credentials.Username)
 
 	// Then, if we've found them, we'll verify their credentials
 	username, id, err := utils.VerifyUser(credentials.Password, respData)
