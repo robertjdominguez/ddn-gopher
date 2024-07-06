@@ -1,0 +1,8 @@
+# root = "."
+# tmp_dir = "tmp"
+# build = "go build -o ./tmp/auth-server ./main.go"
+# cmd = "./tmp/auth-server"
+# include_ext = ["go", "tmpl", "html"]
+# exclude_dir = ["tmp", "vendor"]
+# exclude_file = []
+# bin = "air"
