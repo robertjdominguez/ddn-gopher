@@ -1,43 +1,39 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"dominguezdev.com/auth-server/models"
-	"dominguezdev.com/auth-server/utils"
+	"dominguezdev.com/auth-server/repository"
 	"github.com/gin-gonic/gin"
 )
 
 func LoginHandler(c *gin.Context) {
-	var credentials models.Credentials
+	var loginRequest models.User
 
-	// If the request isn't properly formatted JSON using credentials, error
-	if err := c.ShouldBindJSON(&credentials); err != nil {
+	err := c.ShouldBindJSON(&loginRequest)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
 
-	// Otherwise, we'll take the username and see if it exists
-	respData, _ := utils.CheckForUser(credentials.Username)
-
-	// Then, if we've found them, we'll verify their credentials
-	username, id, err := utils.VerifyUser(credentials.Password, respData)
-
-	// If everything is good, let's give them a token with a user role
-	if len(username) == 0 {
-		fmt.Printf("Error: %s", err.Error())
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+	users, err := repository.CheckForUser(loginRequest.Username)
+	if err != nil || len(users) == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Username not found"})
 		return
 	}
 
-	// If everything is good, let's give them a token with a user role
-	tokenString, err := utils.GenerateJWT(username, id, "user")
+	user, err := repository.VerifyUser(loginRequest.Password, users)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Password is incorrect"})
+		return
+	}
+
+	tokenString, err := repository.GenerateJWT(user.Username, user.ID, "user")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
 	}
 
-	// Then, serve it up to them
 	c.JSON(http.StatusOK, gin.H{"token": tokenString})
 }

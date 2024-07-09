@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"dominguezdev.com/auth-server/models"
-	"dominguezdev.com/auth-server/utils"
+	"dominguezdev.com/auth-server/repository"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,13 +17,13 @@ func RefreshHandler(c *gin.Context) {
 	}
 
 	// If there is no error, we have a token we can decode
-	decodedToken, err := utils.DecodeJWT(request.Token)
+	decodedToken, err := repository.DecodeJWT(request.Token)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
-	newTokenString, err := utils.GenerateJWT(decodedToken.Username, decodedToken.UserId, "user")
+	newTokenString, err := repository.GenerateJWT(decodedToken.Username, decodedToken.UserId, "user")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
