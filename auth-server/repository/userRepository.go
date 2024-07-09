@@ -1,8 +1,7 @@
 package repository
 
 import (
-	"errors"
-
+	"dominguezdev.com/auth-server/errors"
 	"dominguezdev.com/auth-server/models"
 	"dominguezdev.com/auth-server/utils"
 )
@@ -11,7 +10,7 @@ func CheckForUser(username string) ([]models.User, error) {
 	client := utils.CreateClient()
 
 	if username == "" {
-		return nil, errors.New("username cannot be empty")
+		return nil, customErrors.ErrEmptyUsername
 	}
 
 	variables := map[string]interface{}{
@@ -30,33 +29,33 @@ func CheckForUser(username string) ([]models.User, error) {
 
 	userUsers, ok := respData["user_users"].([]interface{})
 	if !ok {
-		return nil, errors.New("user data not found or is in incorrect format")
+		return nil, customErrors.ErrUserDataNotFound
 	}
 
 	if len(userUsers) == 0 {
-		return nil, errors.New("no users found")
+		return nil, customErrors.ErrNoUsersFound
 	}
 
 	var users []models.User
 	for _, user := range userUsers {
 		userMap, ok := user.(map[string]interface{})
 		if !ok {
-			return nil, errors.New("user data is not in expected format")
+			return nil, customErrors.ErrUserDataFormat
 		}
 
 		id, ok := userMap["id"].(float64)
 		if !ok {
-			return nil, errors.New("user ID not found or is in incorrect format")
+			return nil, customErrors.ErrUserIDFormat
 		}
 
 		username, ok := userMap["username"].(string)
 		if !ok {
-			return nil, errors.New("username not found for user")
+			return nil, customErrors.ErrUsernameNotFound
 		}
 
 		password, ok := userMap["password"].(string)
 		if !ok {
-			return nil, errors.New("password not found for user")
+			return nil, customErrors.ErrPasswordNotFound
 		}
 
 		users = append(users, models.User{
@@ -75,5 +74,5 @@ func VerifyUser(reqPassword string, users []models.User) (*models.User, error) {
 			return &user, nil
 		}
 	}
-	return nil, errors.New("invalid username or password")
+	return nil, customErrors.ErrInvalidUsernameOrPassword
 }
