@@ -54,11 +54,11 @@ func QueryHasura(client *graphql.Client, query string, variables map[string]inte
 }
 
 var UserQuery string = `
-    query UserQuery($username: User_Varchar) {
-      user_users(where: {username: {_eq: $username}}) {
+    query UserQuery($username: User_Varchar!) {
+      user_usersByUsername(username: $username) {
         id
-        username
         password
+        username
       }
     }
 	`

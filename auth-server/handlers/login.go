@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"dominguezdev.com/auth-server/models"
@@ -17,13 +18,14 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	users, err := repository.CheckForUser(loginRequest.Username)
-	if err != nil || len(users) == 0 {
+	foundUser, err := repository.CheckForUser(loginRequest.Username)
+	if err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Username not found"})
 		return
 	}
 
-	user, err := repository.VerifyUser(loginRequest.Password, users)
+	user, err := repository.VerifyUser(loginRequest.Password, foundUser)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Password is incorrect"})
 		return

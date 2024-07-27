@@ -6,73 +6,65 @@ import (
 	"dominguezdev.com/auth-server/utils"
 )
 
-func CheckForUser(username string) ([]models.User, error) {
+func CheckForUser(username string) (models.User, error) {
 	client := utils.CreateClient()
 
 	if username == "" {
-		return nil, customErrors.ErrEmptyUsername
+		return models.User{}, customErrors.ErrEmptyUsername
 	}
 
 	variables := map[string]interface{}{
 		"username": username,
 	}
 
+	// We'll need an admin-level JWT to check for the presence of the user
 	token, err := GenerateJWT("", 0, "admin")
 	if err != nil {
-		return nil, err
+		return models.User{}, err
 	}
 
 	respData, err := utils.QueryHasura(client, utils.UserQuery, variables, token)
 	if err != nil {
-		return nil, err
+		return models.User{}, err
 	}
 
-	userUsers, ok := respData["user_users"].([]interface{})
+	returnedUser, ok := respData["user_usersByUsername"]
 	if !ok {
-		return nil, customErrors.ErrUserDataNotFound
+		return models.User{}, customErrors.ErrUserDataNotFound
 	}
 
-	if len(userUsers) == 0 {
-		return nil, customErrors.ErrNoUsersFound
+	userMap, ok := returnedUser.(map[string]interface{})
+	if !ok {
+		return models.User{}, customErrors.ErrUserDataFormat
 	}
 
-	var users []models.User
-	for _, user := range userUsers {
-		userMap, ok := user.(map[string]interface{})
-		if !ok {
-			return nil, customErrors.ErrUserDataFormat
-		}
-
-		id, ok := userMap["id"].(float64)
-		if !ok {
-			return nil, customErrors.ErrUserIDFormat
-		}
-
-		username, ok := userMap["username"].(string)
-		if !ok {
-			return nil, customErrors.ErrUsernameNotFound
-		}
-
-		password, ok := userMap["password"].(string)
-		if !ok {
-			return nil, customErrors.ErrPasswordNotFound
-		}
-
-		users = append(users, models.User{
-			Username: username,
-			Password: password,
-			ID:       id,
-		})
+	id, ok := userMap["id"].(float64)
+	if !ok {
+		return models.User{}, customErrors.ErrUserIDFormat
 	}
 
-	return users, nil
+	username, ok = userMap["username"].(string)
+	if !ok {
+		return models.User{}, customErrors.ErrUsernameNotFound
+	}
+
+	password, ok := userMap["password"].(string)
+	if !ok {
+		return models.User{}, customErrors.ErrPasswordNotFound
+	}
+
+	user := models.User{
+		Username: username,
+		Password: password,
+		ID:       id,
+	}
+
+	return user, nil
 }
 
-func VerifyUser(reqPassword string, users []models.User) (*models.User, error) {
-	for _, user := range users {
-		if err := user.VerifyPassword(reqPassword); err == nil {
-			return &user, nil
-		}
+func VerifyUser(reqPassword string, user models.User) (*models.User, error) {
+	if err := user.VerifyPassword(reqPassword); err == nil {
+		return &user, nil
 	}
 	return nil, customErrors.ErrInvalidUsernameOrPassword
 }
