@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"dominguezdev.com/cli/auth"
 	"dominguezdev.com/cli/tui"
@@ -20,6 +21,20 @@ var loginCmd = &cobra.Command{
 	Short: "Login with your username and password",
 	Run: func(cmd *cobra.Command, args []string) {
 		if noPrompt {
+			if err := cmd.MarkFlagRequired("username"); err != nil {
+				fmt.Println("Error marking flag required:", err)
+				os.Exit(1)
+			}
+			if err := cmd.MarkFlagRequired("password"); err != nil {
+				fmt.Println("Error marking flag required:", err)
+				os.Exit(1)
+			}
+
+			if err := cmd.ParseFlags(os.Args[2:]); err != nil {
+				fmt.Println("Error parsing flags:", err)
+				os.Exit(1)
+			}
+
 			err := auth.Login(username, password)
 			if err != nil {
 				fmt.Println("Error:", err)
@@ -40,6 +55,4 @@ func init() {
 	loginCmd.Flags().BoolVarP(&noPrompt, "no-prompt", "n", false, "Use command-line flags for login")
 	loginCmd.Flags().StringVarP(&username, "username", "u", "", "Username")
 	loginCmd.Flags().StringVarP(&password, "password", "p", "", "Password")
-	loginCmd.MarkFlagRequired("username")
-	loginCmd.MarkFlagRequired("password")
 }
