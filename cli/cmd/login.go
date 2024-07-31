@@ -11,6 +11,7 @@ import (
 
 // Top-level variables for our username and password being passed by the user
 var (
+	noPrompt bool
 	username string
 	password string
 )
@@ -19,23 +20,31 @@ var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Login with your username and password",
 	Run: func(cmd *cobra.Command, args []string) {
-		login(username, password)
+		if noPrompt {
+			err := Login(username, password)
+			if err != nil {
+				fmt.Println("Error:", err)
+			}
+		}
 	},
 }
 
 func init() {
-	// This AddCommand adds the loginCmd to our root set of commands
-	// TODO: Where is our rootCmd coming from in this context?
+	// This AddCommand adds the loginCmd to our root set of commands.
+	// rootCmd is available because this file and it are part of the same
+	// cmd package.
 	rootCmd.AddCommand(loginCmd)
 
 	// This sets the flags our command uses and marks which are req
+	loginCmd.Flags().BoolVarP(&noPrompt, "no-prompt", "n", false, "Use command-line flags for login")
 	loginCmd.Flags().StringVarP(&username, "username", "u", "", "Username")
 	loginCmd.Flags().StringVarP(&password, "password", "p", "", "Password")
 	loginCmd.MarkFlagRequired("username")
 	loginCmd.MarkFlagRequired("password")
 }
 
-func login(username, password string) {
+// We're making this a public function so that we can reuse it in the TUI
+func Login(username, password string) error {
 	// We'll cretae a payload that will eventually be transformed into JSON
 	payload := map[string]string{
 		"username": username,
@@ -60,27 +69,22 @@ func login(username, password string) {
 	var result map[string]interface{}
 	err = json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
-		fmt.Println("Error decoding response:", err)
+		return fmt.Errorf("Error decoding response: %v", err)
 	}
 
 	// Let's first check to see if the server returns an error
-	error, ok := result["error"].(string)
-
-	// If there is, we need to do an early return and let the user know what the error is
+	errorMsg, ok := result["error"].(string)
 	if ok {
-		fmt.Println("Error logging in:", error)
-		return
+		return fmt.Errorf("Error logging in: %s", errorMsg)
 	}
 
 	// Otherwise, let's try to get the value from the "token" key of the returned data
 	token, ok := result["token"].(string)
-
-	// On the chance "token" is missing, something bad happened
 	if !ok {
-		fmt.Println("Error: token not found in response")
-		return
+		return fmt.Errorf("Error: token not found in response")
 	}
 
 	// For now, let's just print the token with an affirming message 🤷
 	fmt.Println("You bastard...you logged in! Here's your token:", token)
+	return nil
 }
