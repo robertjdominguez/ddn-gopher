@@ -1,18 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"os"
-
-	"dominguezdev.com/cli/commands"
-
-	tea "github.com/charmbracelet/bubbletea"
+	"dominguezdev.com/cli/cmd"
 )
 
 func main() {
-	p := tea.NewProgram(commands.InitialToDoList())
-	if _, err := p.Run(); err != nil {
-		fmt.Printf("Alas, there's been an error: %v", err)
-		os.Exit(1)
-	}
+	cmd.Execute()
 }
