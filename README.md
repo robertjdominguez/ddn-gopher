@@ -5,7 +5,7 @@ This is a bundled suite of applications which you can run with Docker:
 - [x] An authentication server, using Gin
 - [x] A PostgreSQL database with a `users` table by default
 - [x] A pre-loaded Hasura DDN project which can be run locally
-- [ ] A starter CLI application, using Bubble Tea
+- [x] A starter CLI application, using Bubble Tea
 
 ## Prerequisites
 

@@ -17,7 +17,7 @@ const (
 	profileScreen
 )
 
-type model struct {
+type loginModel struct {
 	username textinput.Model
 	password textinput.Model
 	err      error
@@ -27,9 +27,11 @@ type model struct {
 	height   int
 }
 
-func initialModel() model {
-	m := model{
-		state: loginScreen,
+func initialLoginModel(width, height int) loginModel {
+	m := loginModel{
+		state:  loginScreen,
+		width:  width,
+		height: height,
 	}
 
 	m.username = textinput.New()
@@ -43,11 +45,11 @@ func initialModel() model {
 	return m
 }
 
-func (m model) Init() tea.Cmd {
+func (m loginModel) Init() tea.Cmd {
 	return tea.Batch(textinput.Blink, tea.EnterAltScreen)
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m loginModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
@@ -87,7 +89,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) View() string {
+func (m loginModel) View() string {
 	switch m.state {
 	case loginScreen:
 		return m.loginView()
@@ -98,7 +100,7 @@ func (m model) View() string {
 	}
 }
 
-func (m model) loginView() string {
+func (m loginModel) loginView() string {
 	titleStyle := lipgloss.NewStyle().
 		Width(m.width).
 		Align(lipgloss.Center).
