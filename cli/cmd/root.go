@@ -4,13 +4,25 @@ import (
 	"fmt"
 	"os"
 
+	"dominguezdev.com/cli/tui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "DDN Gopher Client CLI",
+	Use:   "ddn-gopher",
 	Short: "A CLI tool which access a DDN-powered API",
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			tui.RunTUI()
+		} else {
+			err := cmd.Help()
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+	},
 }
 
 func Execute() {

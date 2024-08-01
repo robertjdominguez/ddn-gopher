@@ -2,21 +2,35 @@ package tui
 
 import (
 	"fmt"
+	"log"
 
 	"dominguezdev.com/cli/auth"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+)
+
+type loginState int
+
+const (
+	loginScreen loginState = iota
+	profileScreen
 )
 
 type model struct {
 	username textinput.Model
 	password textinput.Model
 	err      error
-	success  bool
+	token    string
+	state    loginState
+	width    int
+	height   int
 }
 
 func initialModel() model {
-	m := model{}
+	m := model{
+		state: loginScreen,
+	}
 
 	m.username = textinput.New()
 	m.username.Placeholder = "Username"
@@ -30,7 +44,7 @@ func initialModel() model {
 }
 
 func (m model) Init() tea.Cmd {
-	return textinput.Blink
+	return tea.Batch(textinput.Blink, tea.EnterAltScreen)
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -40,20 +54,30 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyCtrlC, tea.KeyEsc:
 			return m, tea.Quit
 		case tea.KeyTab:
-			if m.username.Focused() {
-				m.username.Blur()
-				m.password.Focus()
-			} else {
-				m.password.Blur()
-				m.username.Focus()
+			if m.state == loginScreen {
+				if m.username.Focused() {
+					m.username.Blur()
+					m.password.Focus()
+				} else {
+					m.password.Blur()
+					m.username.Focus()
+				}
 			}
 		case tea.KeyEnter:
-			m.err = auth.Login(m.username.Value(), m.password.Value())
-			if m.err == nil {
-				m.success = true
+			if m.state == loginScreen {
+				log.Printf("Username: %s, Password: %s\n", m.username.Value(), m.password.Value())
+				var token string
+				token, m.err = auth.Login(m.username.Value(), m.password.Value())
+				if m.err == nil {
+					m.token = token
+					return newProfileModel(token).Update(msg)
+				}
 			}
-			return m, tea.Quit
 		}
+
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.height = msg.Height
 	}
 
 	var cmd tea.Cmd
@@ -64,19 +88,44 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	if m.success {
-		return "You successfully logged in!"
+	switch m.state {
+	case loginScreen:
+		return m.loginView()
+	case profileScreen:
+		return newProfileModel(m.token).View()
+	default:
+		return "Unknown state!"
 	}
-	if m.err != nil {
-		return fmt.Sprintf("Error: %v\n\n", m.err) + m.username.View() + "\n" + m.password.View()
-	}
-	return m.username.View() + "\n" + m.password.View()
 }
 
-func RunTUI() {
-	p := tea.NewProgram(initialModel())
-	if err := p.Start(); err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+func (m model) loginView() string {
+	titleStyle := lipgloss.NewStyle().
+		Width(m.width).
+		Align(lipgloss.Center).
+		Border(lipgloss.DoubleBorder()).
+		BorderForeground(lipgloss.Color("62"))
+
+	preambleStyle := lipgloss.NewStyle().
+		Width(m.width).
+		Padding(1, 0, 1, 0).
+		Align(lipgloss.Center)
+
+	boxStyle := lipgloss.NewStyle().
+		Width(m.width-4).
+		Align(lipgloss.Center).
+		Border(lipgloss.RoundedBorder()).
+		Padding(1, 2).
+		MarginTop(2)
+
+	title := titleStyle.Render("Welcome to DDN Gopher")
+	preamble := preambleStyle.Render("Please enter your credentials to log in:")
+	inputs := m.username.View() + "\n" + m.password.View()
+
+	content := lipgloss.JoinVertical(lipgloss.Center, title, preamble, boxStyle.Render(inputs))
+
+	if m.err != nil {
+		content = fmt.Sprintf("Error: %v\n\n", m.err) + content
 	}
+
+	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, content)
 }

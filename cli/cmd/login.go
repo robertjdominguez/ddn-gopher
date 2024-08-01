@@ -35,7 +35,7 @@ var loginCmd = &cobra.Command{
 				os.Exit(1)
 			}
 
-			err := auth.Login(username, password)
+			_, err := auth.Login(username, password)
 			if err != nil {
 				fmt.Println("Error:", err)
 			}
