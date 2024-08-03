@@ -18,20 +18,22 @@ const (
 )
 
 type loginModel struct {
-	username textinput.Model
-	password textinput.Model
-	err      error
-	token    string
-	state    loginState
-	width    int
-	height   int
+	username        textinput.Model
+	password        textinput.Model
+	err             error
+	token           string
+	state           loginState
+	showErrorWindow bool
+	width           int
+	height          int
 }
 
 func initialLoginModel(width, height int) loginModel {
 	m := loginModel{
-		state:  loginScreen,
-		width:  width,
-		height: height,
+		state:           loginScreen,
+		width:           width,
+		height:          height,
+		showErrorWindow: false,
 	}
 
 	m.username = textinput.New()
@@ -53,8 +55,9 @@ func (m loginModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
-		case tea.KeyCtrlC, tea.KeyEsc:
+		case tea.KeyCtrlC:
 			return m, tea.Quit
+
 		case tea.KeyTab:
 			if m.state == loginScreen {
 				if m.username.Focused() {
@@ -65,6 +68,7 @@ func (m loginModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.username.Focus()
 				}
 			}
+
 		case tea.KeyEnter:
 			if m.state == loginScreen {
 				log.Printf("Username: %s, Password: %s\n", m.username.Value(), m.password.Value())
@@ -73,7 +77,16 @@ func (m loginModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.err == nil {
 					m.token = token
 					return newProfileModel(token).Update(msg)
+				} else {
+					m.showErrorWindow = true
 				}
+			}
+
+		case tea.KeyEsc:
+			if m.showErrorWindow {
+				m.showErrorWindow = false
+			} else {
+				return m, tea.Quit
 			}
 		}
 
@@ -125,8 +138,15 @@ func (m loginModel) loginView() string {
 
 	content := lipgloss.JoinVertical(lipgloss.Center, title, preamble, boxStyle.Render(inputs))
 
-	if m.err != nil {
-		content = fmt.Sprintf("Error: %v\n\n", m.err) + content
+	if m.showErrorWindow {
+		errorWindow := lipgloss.NewStyle().
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color("196")).
+			Padding(1, 2).
+			SetString(fmt.Sprintf("Error: %v", m.err)).
+			String()
+
+		content = lipgloss.JoinVertical(lipgloss.Center, content, errorWindow)
 	}
 
 	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, content)
