@@ -76,7 +76,7 @@ func GetJWTSecret() []byte {
 }
 
 // This will generate a JWT with the username, id, and role.
-func GenerateJWT(username string, id float64, roles ...string) (string, error) {
+func GenerateJWT(username string, id float64, roles ...string) (*string, error) {
 	// Let's make sure we have the secret
 	jwtSecret := GetJWTSecret()
 
@@ -92,8 +92,8 @@ func GenerateJWT(username string, id float64, roles ...string) (string, error) {
 
 	tokenString, err := token.SignedString(jwtSecret)
 	if err != nil {
-		return "", fmt.Errorf("GenerateJWT: failed to generate a JWT: %w", err)
+		return nil, fmt.Errorf("GenerateJWT: failed to generate a JWT: %w", err)
 	}
 
-	return tokenString, nil
+	return &tokenString, nil
 }

@@ -23,7 +23,7 @@ func CheckForUser(username string) (models.User, error) {
 		return models.User{}, err
 	}
 
-	respData, err := utils.QueryHasura(client, utils.UserQuery, variables, token)
+	respData, err := utils.QueryHasura(client, utils.UserQuery, variables, *token)
 	if err != nil {
 		return models.User{}, err
 	}
