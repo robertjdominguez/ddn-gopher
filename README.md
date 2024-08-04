@@ -1,5 +1,8 @@
 # DDN Gopher
 
+![image](https://github.com/user-attachments/assets/e46e2cb8-07fd-4cf1-a919-6212291a4313)
+
+
 This is a bundled suite of applications which you can run with Docker:
 
 - [x] An authentication server, using Gin
