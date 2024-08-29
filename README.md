@@ -70,3 +70,7 @@ From the root of the project, run:
 ```bash
 HASURA_DDN_PAT=$(ddn auth print-pat) docker compose --env-file hasura/.env up --build --watch
 ```
+
+## Learn more
+
+To learn more about Hasura DDN, [check out the docs](https://hasura.io/docs)!

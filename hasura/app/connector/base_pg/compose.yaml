@@ -23,4 +23,5 @@ services:
         published: "7772"
         protocol: tcp
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
