@@ -35,7 +35,7 @@ cd ddn-gopher
 Then, create a new `.env` file with a JWT secret key:
 
 ```bash
-touch ./auth-server/.env && echo "JWT_SECRET=somethingSuperSecureGoesHere!" > ./auth-server/.env
+touch ./auth-server/.env && echo 'JWT_SECRET=somethingSuperSecureGoesHere!\nGRAPHQL_ENDPOINT="http://engine:3000/graphql"' > ./auth-server/.env
 ```
 
 ### Step 3. Update the AuthConfig
@@ -69,6 +69,32 @@ From the root of the project, run:
 
 ```bash
 HASURA_DDN_PAT=$(ddn auth print-pat) docker compose --env-file hasura/.env up --build --watch
+```
+
+### Step 4. Use the CLI
+
+A CLI application that supports a no-prompt mode and a TUI ships with the repo. You can run the following to execute the
+root command of the CLI and jump into the default flow:
+
+```bash
+cd cli && go run main.go
+```
+
+You can then login with one of two sets of credentials:
+
+| username     | password         |
+| ------------ | ---------------- |
+| exampleuser  | examplepassword  |
+| exampleuser1 | examplepassword1 |
+
+With the correct credentials, the CLI will turf you to a profile screen that includes your generated JWT.
+
+### Step 5. Explore Hasura DDN
+
+You can also explore the console - Hasura's GUI — by running:
+
+```bash
+ddn console --local
 ```
 
 ## Learn more
