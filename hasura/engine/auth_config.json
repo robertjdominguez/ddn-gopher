@@ -1,1 +1,0 @@
-{"version":"v1","definition":{"allowRoleEmulationBy":null,"mode":{"jwt":{"audience":null,"issuer":null,"allowedSkew":null,"claimsConfig":{"namespace":{"claimsFormat":"Json","location":"/https:~1~1hasura.io~1jwt~1claims"}},"tokenLocation":{"type":"BearerAuthorization"},"key":{"fixed":{"algorithm":"HS256","key":{"value":"3q2+7w==iQ=="}}}}}}}

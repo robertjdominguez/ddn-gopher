@@ -3,9 +3,9 @@ package models
 import "errors"
 
 type User struct {
-	Username string  `json:"username"`
-	Password string  `json:"password"`
-	ID       float64 `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	ID       string `json:"id"`
 }
 
 // VerifyPassword can be used on found user to check if their povided password is correct.

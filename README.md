@@ -2,7 +2,6 @@
 
 ![image](https://github.com/user-attachments/assets/e46e2cb8-07fd-4cf1-a919-6212291a4313)
 
-
 This is a bundled suite of applications which you can run with Docker:
 
 - [x] An authentication server, using Gin
@@ -47,17 +46,14 @@ With whatever value you used above, replace `3q2+7w==iQ==` in this ☝️ file:
 
 ```yaml
 kind: AuthConfig
-version: v1
+version: v2
 definition:
   mode:
     jwt:
-      audience: null
-      issuer: null
-      allowedSkew: null
       claimsConfig:
         namespace:
           claimsFormat: Json
-          location: /https:~1~1hasura.io~1jwt~1claims
+          location: /claims.jwt.hasura.io
       tokenLocation:
         type: BearerAuthorization
       key:
@@ -72,5 +68,5 @@ definition:
 From the root of the project, run:
 
 ```bash
- HASURA_DDN_PAT=$(ddn auth print-pat) docker compose up -d
+HASURA_DDN_PAT=$(ddn auth print-pat) docker compose --env-file hasura/.env up --build --watch
 ```

@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"strconv"
+
 	"dominguezdev.com/auth-server/errors"
 	"dominguezdev.com/auth-server/models"
 	"dominguezdev.com/auth-server/utils"
@@ -18,7 +20,7 @@ func CheckForUser(username string) (models.User, error) {
 	}
 
 	// We'll need an admin-level JWT to check for the presence of the user
-	token, err := GenerateJWT("", 0, "admin")
+	token, err := GenerateJWT("", "", "admin")
 	if err != nil {
 		return models.User{}, err
 	}
@@ -28,7 +30,7 @@ func CheckForUser(username string) (models.User, error) {
 		return models.User{}, err
 	}
 
-	returnedUser, ok := respData["user_usersByUsername"]
+	returnedUser, ok := respData["usersByUsername"]
 	if !ok {
 		return models.User{}, customErrors.ErrUserDataNotFound
 	}
@@ -43,6 +45,8 @@ func CheckForUser(username string) (models.User, error) {
 		return models.User{}, customErrors.ErrUserIDFormat
 	}
 
+	idStr := strconv.FormatFloat(id, 'f', -1, 64)
+
 	username, ok = userMap["username"].(string)
 	if !ok {
 		return models.User{}, customErrors.ErrUsernameNotFound
@@ -56,7 +60,7 @@ func CheckForUser(username string) (models.User, error) {
 	user := models.User{
 		Username: username,
 		Password: password,
-		ID:       id,
+		ID:       idStr,
 	}
 
 	return user, nil

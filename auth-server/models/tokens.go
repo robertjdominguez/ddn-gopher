@@ -9,7 +9,7 @@ import (
 
 type DecodedToken struct {
 	Username string
-	UserId   float64
+	UserId   string
 	IsValid  bool
 }
 
@@ -22,7 +22,7 @@ var AdminClaims = map[string]interface{}{
 }
 
 // ShapeUserClaims shapes user claims based on the userId and userRole.
-func ShapeUserClaims(userId float64, userRole string) map[string]interface{} {
+func ShapeUserClaims(userId string, userRole string) map[string]interface{} {
 	return map[string]interface{}{
 		"x-hasura-user-id":       userId,
 		"x-hasura-role":          userRole,
@@ -32,14 +32,14 @@ func ShapeUserClaims(userId float64, userRole string) map[string]interface{} {
 }
 
 // GenerateClaims generates JWT claims based on the username, userId, and userRole.
-func GenerateClaims(username string, userId float64, userRole string) jwt.MapClaims {
+func GenerateClaims(username string, userId string, userRole string) jwt.MapClaims {
 	claims := jwt.MapClaims{
 		"user":                         username,
 		"exp":                          time.Now().Add(time.Hour * 72).Unix(),
-		"https://hasura.io/jwt/claims": map[string]interface{}{},
+		"claims.jwt.hasura.io": map[string]interface{}{},
 	}
 
-	hasuraClaims := claims["https://hasura.io/jwt/claims"].(map[string]interface{})
+	hasuraClaims := claims["claims.jwt.hasura.io"].(map[string]interface{})
 
 	if userRole == "admin" {
 		for key, value := range AdminClaims {

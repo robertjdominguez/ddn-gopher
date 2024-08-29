@@ -36,13 +36,13 @@ func DecodeJWT(encodedToken string) (models.DecodedToken, error) {
 	}
 
 	// We'll check to make sure our Hasura claims are part of the JWT
-	hasuraClaims, ok := claims["https://hasura.io/jwt/claims"].(map[string]interface{})
+	hasuraClaims, ok := claims["claims.jwt.hasura.io"].(map[string]interface{})
 	if !ok {
 		return decodedToken, errors.New("invalid Hasura claims")
 	}
 
 	// Then, we'll make sure there's a user present
-	userId, ok := hasuraClaims["x-hasura-user-id"].(float64)
+	userId, ok := hasuraClaims["x-hasura-user-id"]
 	if !ok {
 		return decodedToken, errors.New("user ID not found in claims")
 	}
@@ -50,7 +50,7 @@ func DecodeJWT(encodedToken string) (models.DecodedToken, error) {
 	// Finally, we'll send back the decoded information
 	decodedToken = models.DecodedToken{
 		IsValid:  true,
-		UserId:   userId,
+		UserId:   userId.(string),
 		Username: claims["user"].(string),
 	}
 
@@ -76,7 +76,7 @@ func GetJWTSecret() []byte {
 }
 
 // This will generate a JWT with the username, id, and role.
-func GenerateJWT(username string, id float64, roles ...string) (*string, error) {
+func GenerateJWT(username string, id string, roles ...string) (*string, error) {
 	// Let's make sure we have the secret
 	jwtSecret := GetJWTSecret()
 
@@ -94,6 +94,8 @@ func GenerateJWT(username string, id float64, roles ...string) (*string, error) 
 	if err != nil {
 		return nil, fmt.Errorf("GenerateJWT: failed to generate a JWT: %w", err)
 	}
+
+	fmt.Println("Generated JWT: ", tokenString)
 
 	return &tokenString, nil
 }

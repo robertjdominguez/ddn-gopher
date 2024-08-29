@@ -1,0 +1,33 @@
+include:
+  - path: hasura/compose.yaml
+
+services:
+  auth-server:
+    build:
+      context: .
+      dockerfile: auth-server/Dockerfile
+      args:
+        JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./auth-server/.env
+    volumes:
+      - ./auth-server:/app
+      - /app/tmp
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+    environment:
+      POSTGRES_DB: yourmomsdatabase
+      POSTGRES_USER: yourmom
+      POSTGRES_PASSWORD: yourmomspassword
+
+volumes:
+  pgdata:
